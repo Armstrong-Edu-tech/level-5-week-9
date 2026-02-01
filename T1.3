@@ -1,0 +1,31 @@
+import React, { useState, useContext, useMemo } from 'react';
+
+const MyContext = React.createContext();
+
+const Provider = ({ children }) => {
+  const [count, setCount] = useState(0);
+
+  // Memoize context value so it only changes when `count` changes
+  const value = useMemo(() => ({
+    count,
+    increment: () => setCount(c => c + 1),
+  }), [count]);
+
+  console.log('Provider rendered');
+
+  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
+};
+
+const ConsumerComponent = React.memo(() => {
+  const { count } = useContext(MyContext);
+  console.log('Consumer rendered');
+  return <div>Count: {count}</div>;
+});
+
+export default function App() {
+  return (
+    <Provider>
+      <ConsumerComponent />
+    </Provider>
+  );
+}
