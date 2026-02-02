@@ -1,0 +1,140 @@
+import React, { createContext, useReducer, useContext, useState } from "react";
+
+// 1. Create Auth Context
+
+export const AuthContext=React.createContext();
+
+const initialState={
+  isAuthenticated:false,
+  user:null,
+  token:null
+}
+
+const reducer=(state,action)=>{
+  switch(action.type){
+    case "LOGIN":
+      return{
+        ...state,
+        isAuthenticated:true,
+        user:action.payload.user,
+        token:action.payload.token
+      };
+      case "LOGOUT":
+        return{
+          ...state,
+          isAuthenticated:false,
+          user:null,
+          token:null
+
+        };
+      default:
+          return state
+        
+  }
+}
+
+// 4. AuthProvider component that provides auth state and dispatch globally
+export const AuthProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <AuthContext.Provider value={{ state, dispatch }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// 5. Login component
+const Login = () => {
+  const { dispatch } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    // Fake API call simulation
+    setTimeout(() => {
+      if (email === "user@example.com" && password === "password") {
+        // On success, dispatch LOGIN action with user data and token
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            user: { name: "John Doe", email },
+            token: "fake-jwt-token-123",
+          },
+        });
+      } else {
+        setErrorMessage("Invalid email or password");
+      }
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h2>Login</h2>
+      <label>
+        Email:
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </label>
+      <br />
+      <label>
+        Password:
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </label>
+      <br />
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  );
+};
+
+// 6. Home component that shows user info and logout button
+const Home = () => {
+  const { state, dispatch } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    dispatch({ type: "LOGOUT" });
+  };
+
+  return (
+    <div>
+      <h2>Welcome, {state.user.name}!</h2>
+      <p>Your email: {state.user.email}</p>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+};
+
+// 7. App component switches between Login and Home based on auth state
+const App = () => {
+  const { state } = useContext(AuthContext);
+
+  return <div>{state.isAuthenticated ? <Home /> : <Login />}</div>;
+};
+
+// 8. Wrap App with AuthProvider to provide global auth state
+export default function Root() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
+}
