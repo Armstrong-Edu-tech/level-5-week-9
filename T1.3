@@ -1,25 +1,37 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo } from "react";
 
 const MyContext = React.createContext();
 
 const Provider = ({ children }) => {
   const [count, setCount] = useState(0);
+  const [theme, setTheme] = useState("light");
 
-  // Memoize context value so it only changes when `count` changes
   const value = useMemo(() => ({
     count,
-    increment: () => setCount(c => c + 1),
+    increment: () => setCount((c) => c + 1),
   }), [count]);
 
-  console.log('Provider rendered');
+  console.log("Provider rendered");
 
-  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
+  return (
+    <MyContext.Provider value={value}>
+      <div style={{ padding: "20px" }}>
+        <button onClick={() => setTheme(t => t === "light" ? "dark" : "light")}>
+          Toggle Theme
+        </button>
+
+        <p>Theme: {theme}</p>
+
+        {children}
+      </div>
+    </MyContext.Provider>
+  );
 };
 
 const ConsumerComponent = React.memo(() => {
   const { count, increment } = useContext(MyContext);
 
-  console.log('Consumer rendered');
+  console.log("Consumer rendered");
 
   return (
     <div>
@@ -28,7 +40,6 @@ const ConsumerComponent = React.memo(() => {
     </div>
   );
 });
-
 
 export default function App() {
   return (
