@@ -17,10 +17,18 @@ const Provider = ({ children }) => {
 };
 
 const ConsumerComponent = React.memo(() => {
-  const { count } = useContext(MyContext);
+  const { count, increment } = useContext(MyContext);
+
   console.log('Consumer rendered');
-  return <div>Count: {count}</div>;
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Add</button>
+    </div>
+  );
 });
+
 
 export default function App() {
   return (
