@@ -1,0 +1,147 @@
+import { createContext, useReducer, useContext } from "react";
+
+/* =======================
+   AUTH CONTEXT
+======================= */
+
+const AuthStateContext = createContext(null);
+const AuthDispatchContext = createContext(null);
+
+const authInitialState = {
+  isAuthenticated: false,
+};
+
+function authReducer(state, action) {
+  switch (action.type) {
+    case "LOGIN":
+      return { isAuthenticated: true };
+    case "LOGOUT":
+      return { isAuthenticated: false };
+    default:
+      return state;
+  }
+}
+
+/* =======================
+   THEME CONTEXT
+======================= */
+
+const ThemeStateContext = createContext(null);
+const ThemeDispatchContext = createContext(null);
+
+const themeInitialState = {
+  theme: "light",
+};
+
+function themeReducer(state, action) {
+  switch (action.type) {
+    case "TOGGLE_THEME":
+      return {
+        theme: state.theme === "light" ? "dark" : "light",
+      };
+    default:
+      return state;
+  }
+}
+
+/* =======================
+   PROVIDERS
+======================= */
+
+function AppProviders({ children }) {
+  const [authState, authDispatch] = useReducer(
+    authReducer,
+    authInitialState
+  );
+
+  const [themeState, themeDispatch] = useReducer(
+    themeReducer,
+    themeInitialState
+  );
+
+  return (
+    <AuthStateContext.Provider value={authState}>
+      <AuthDispatchContext.Provider value={authDispatch}>
+        <ThemeStateContext.Provider value={themeState}>
+          <ThemeDispatchContext.Provider value={themeDispatch}>
+            {children}
+          </ThemeDispatchContext.Provider>
+        </ThemeStateContext.Provider>
+      </AuthDispatchContext.Provider>
+    </AuthStateContext.Provider>
+  );
+}
+
+/* =======================
+   DASHBOARD UI
+======================= */
+
+function Dashboard() {
+  const authState = useContext(AuthStateContext);
+  const authDispatch = useContext(AuthDispatchContext);
+  const themeState = useContext(ThemeStateContext);
+  const themeDispatch = useContext(ThemeDispatchContext);
+
+  const isDark = themeState.theme === "dark";
+
+  return (
+    <div
+      className={`min-h-screen flex items-center justify-center ${
+        isDark ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      }`}
+    >
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
+        <h1 className="text-2xl font-bold mb-4">
+          Global State Demo
+        </h1>
+
+        <p className="mb-2">
+          <span className="font-semibold">User Status:</span>{" "}
+          {authState.isAuthenticated ? "Logged In" : "Logged Out"}
+        </p>
+
+        <p className="mb-4">
+          <span className="font-semibold">Theme:</span>{" "}
+          {themeState.theme}
+        </p>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => authDispatch({ type: "LOGIN" })}
+            className="bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+          >
+            Login
+          </button>
+
+          <button
+            onClick={() => authDispatch({ type: "LOGOUT" })}
+            className="bg-red-500 hover:bg-red-600 text-white py-2 rounded"
+          >
+            Logout
+          </button>
+
+          <button
+            onClick={() =>
+              themeDispatch({ type: "TOGGLE_THEME" })
+            }
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded"
+          >
+            Toggle Theme
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =======================
+   APP
+======================= */
+
+export default function App() {
+  return (
+    <AppProviders>
+      <Dashboard />
+    </AppProviders>
+  );
+}
