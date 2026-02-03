@@ -1,0 +1,85 @@
+import { createContext } from "react";
+
+// Create contexts
+export const AuthContext = createContext(null);
+export const ThemeContext = createContext(null);
+
+// AuthProvider (wraps the whole app)
+function AuthProvider({ children }) {
+  const authValue = { isAuthenticated: true };
+
+  return (
+    <AuthContext.Provider value={authValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// ThemeProvider (wraps only UI-related components)
+function ThemeProvider({ children }) {
+  const themeValue = "dark";
+
+  return (
+    <ThemeContext.Provider value={themeValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+// App structure
+function App() {
+  return (
+    <AuthProvider>
+      <Navbar />
+
+      {/* ThemeProvider is used only where needed */}
+      <ThemeProvider>
+        <Dashboard />
+      </ThemeProvider>
+    </AuthProvider>
+  );
+}
+
+// Components
+function Navbar() {
+  return <h1>Navbar</h1>;
+}
+
+function Dashboard() {
+  return <h2>Dashboard Content</h2>;
+}
+
+
+
+function AppProviders({ children }) {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <UserPreferencesProvider>
+          {children}
+        </UserPreferencesProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  );
+}
+
+function App() {
+  return (
+    <AppProviders>
+      <YourApp />
+    </AppProviders>
+  );
+}
+
+
+
+function useAuth() {
+  return useContext(AuthContext);
+}
+
+function useTheme() {
+  return useContext(ThemeContext);
+}
+
+
+export default App;
